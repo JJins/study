@@ -1,4 +1,5 @@
 import javax.swing.*;
+import java.awt.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -8,17 +9,22 @@ enum Gender {male, female}
 
 class UiUserInfo extends JFrame {
     public UiUserInfo(UserInfo userInfo) {
-        JPanel panel = new JPanel();
-        setContentPane(panel);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setLocationRelativeTo(null);
-
+        JPanel panel = new JPanel(new GridLayout(6, 1));
         JLabel userIdLabel = new JLabel("User ID: " + userInfo.getUserID());
         JLabel usernameLabel = new JLabel("Username: " + userInfo.getUserName());
         JLabel phoneNumberLabel = new JLabel("Phone Number: " + userInfo.getPhoneNumber());
         JLabel emailLabel = new JLabel("Email: " + userInfo.getEmail());
         JLabel genderLabel = new JLabel("Gender: " + userInfo.getGender());
-        JButton setNewGenderButton = new JButton("Set");
+        JButton setNewGenderButton = new JButton("Set Gender");
+
+        panel.add(userIdLabel);
+        panel.add(usernameLabel);
+        panel.add(phoneNumberLabel);
+        panel.add(emailLabel);
+        panel.add(genderLabel);
+        panel.add(setNewGenderButton);
+        panel.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
+
         setNewGenderButton.addActionListener(ActionEvent -> {
             int rs = JOptionPane.showOptionDialog(
                     null,
@@ -28,7 +34,7 @@ class UiUserInfo extends JFrame {
                     JOptionPane.INFORMATION_MESSAGE,
                     null,
                     new String[]{"male", "female", "Cancel"},
-                    "male"
+                    "Cancel"
             );
             if (rs == 0) {
                 if (userInfo.setGender(Gender.male)) {
@@ -45,18 +51,16 @@ class UiUserInfo extends JFrame {
             genderLabel.setText("Gender: " + userInfo.getGender());
         });
 
-        panel.add(userIdLabel);
-        panel.add(usernameLabel);
-        panel.add(phoneNumberLabel);
-        panel.add(emailLabel);
-        panel.add(genderLabel);
-        panel.add(setNewGenderButton);
+        setTitle("User Info - " + userInfo.getUserName());
+        setContentPane(panel);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setLocationRelativeTo(null);
     }
 }
 
 class UserManager {
-    static boolean deleteUserByUserName(String _uname) {
-        if (!DbHelper.isUserNameExisted(_uname)) {
+    static boolean deleteUserByUsername(String _uname) {
+        if (!DbHelper.isUsernameExisted(_uname)) {
             return false;
         }
         Connection c;
@@ -83,7 +87,7 @@ class UserManager {
 }
 
 class DbHelper {
-    static boolean isUserNameExisted(String _uname) {
+    static boolean isUsernameExisted(String _uname) {
         Connection c;
         Statement stmt;
         try {
@@ -154,7 +158,7 @@ class UserLogin {
     }
 
     public boolean register(String password) {
-        if (DbHelper.isUserNameExisted(userName)) {
+        if (DbHelper.isUsernameExisted(userName)) {
             System.out.println("User name is already existed.");
             return false;
         }
@@ -200,7 +204,7 @@ class UserInfo {
     private final String email;
     private Gender gender;
 
-    public UserInfo(int userID, String userName, String phoneNumber, String email, Gender gender) {
+    public UserInfo(int userID, String userName, String email, String phoneNumber, Gender gender) {
         this.userID = userID;
         this.userName = userName;
         this.phoneNumber = phoneNumber;
@@ -311,7 +315,7 @@ public class Home {
             if (rs == null || rs.equals("")) {
                 return;
             }
-            if (UserManager.deleteUserByUserName(rs)) {
+            if (UserManager.deleteUserByUsername(rs)) {
                 JOptionPane.showMessageDialog(null, "Deleted.");
             } else {
                 JOptionPane.showMessageDialog(null, "User not found.");
